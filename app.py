@@ -1,21 +1,37 @@
-from tensorflow.keras.models import load_model
+from flask import Flask, request, jsonify
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+import joblib
 
-# Fungsi untuk memuat model
-def load_my_model():
-    global model
-    model = load_model('my_model.h5')  # Ganti dengan nama model yang benar
+app = Flask(__name__)
 
-# Fungsi untuk melakukan prediksi
-def predict(input_data):
-    input_data = np.array(input_data).reshape(1, -1)  # Sesuaikan dengan format input yang diperlukan
-    prediction = model.predict(input_data)
-    return prediction.tolist()
+# Load model dan scaler
+model = load_model('my_model.h5')
+scaler = joblib.load('scaler.pkl')
 
-# Load model saat aplikasi dimulai
-load_my_model()
+# Fungsi untuk membuat data time series
+def create_time_series(data, time_steps):
+    X = []
+    for i in range(len(data) - time_steps):
+        X.append(data[i:i + time_steps])
+    return np.array(X)
 
-# Contoh penggunaan prediksi
-input_data = [0.1, 0.2, 0.3]  # Ganti dengan input yang sesuai
-result = predict(input_data)
-print(f'Prediction result: {result}')
+@app.route('/predict', methods=['POST'])
+def predict():
+    json_data = request.get_json()
+    data = json_data['data']
+
+    # Preprocessing data
+    data = np.array(data).reshape(-1, 1)
+    data_scaled = scaler.transform(data)
+    time_steps = 30
+    X = create_time_series(data_scaled, time_steps)
+
+    # Predict
+    predictions = model.predict(X)
+    predictions = scaler.inverse_transform(predictions)
+    return jsonify(predictions.tolist())
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
