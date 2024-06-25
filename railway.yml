@@ -1,10 +1,13 @@
-version: 2.0
 services:
-  app:
-    name: app
+  - name: lstm-service
+    image: python:3.8-slim
     env:
-      PYTHON_VERSION: 3.8
-    buildScript: python3 -m pip install -r requirements.txt
-    run: python3 app.py
-
-    
+      PORT: 5000
+    deploy:
+      command: python app.py
+      resources:
+        cpu: 1000
+        memory: 512
+    volumes:
+      - ./model_lstm.h5:/app/model_lstm.h5
+      - ./scaler.pkl:/app/scaler.pkl
