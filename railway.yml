@@ -1,7 +1,7 @@
 version: 2.0
 services:
   app:
-    name: my-app
+    name: app
     env:
       PYTHON_VERSION: 3.8
     buildScript: python3 -m pip install -r requirements.txt
