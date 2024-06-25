@@ -9,5 +9,5 @@ services:
         cpu: 1000
         memory: 512
     volumes:
-      - ./model_lstm.h5:/app/model_lstm.h5
+      - ./my_model.h5:/app/my_model.h5
       - ./scaler.pkl:/app/scaler.pkl
